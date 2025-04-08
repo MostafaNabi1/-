@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>حاسبة غرامة التأخير</title>
+  <style>
+    body {
+      font-family: Arial;
+      direction: rtl;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    background-color: #98B4D4;
+    }
+
+    .container {
+      text-align: center;
+      max-width: 500px;
+      width: 100%;
+    }
+
+    label, input {
+      display: block;
+      margin: 1rem auto;
+      text-align: center;
+     
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 2rem;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: center;
+    }
+
+    th {
+      background: #f0f0f0;
+    }
+
+    .result {
+      margin-top: 1rem;
+    }
+
+    button {
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 >حاسبة غرامة التأخير</h1>
+    <p>Develop by Mostafa Nabil</p>
+
+    <label>قيمة القسط:
+      <input type="number" id="installment" value="1000">
+    </label>
+
+    <label>تاريخ الاستحقاق:
+      <input type="date" id="dueDate">
+    </label>
+
+    <label>تاريخ السداد:
+      <input type="date" id="paymentDate">
+    </label>
+
+    <button onclick="calculatePenalty()">احسب الغرامة</button>
+
+    <div class="result" id="result"></div>
+  </div>
+
+  <script>
+    function calculatePenalty() {
+      const installment = parseFloat(document.getElementById('installment').value);
+      const dueDate = new Date(document.getElementById('dueDate').value);
+      const paymentDate = new Date(document.getElementById('paymentDate').value);
+      const penaltyRate = 0.06;
+      const minPenalty = 60;
+      const resultDiv = document.getElementById('result');
+      resultDiv.innerHTML = '';
+
+      const diffTime = paymentDate - dueDate;
+      const daysLate = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+      if (isNaN(daysLate) || daysLate <= 5) {
+        resultDiv.innerHTML = '<p>لا توجد غرامات طالما لم تتجاوز فترة السماح.</p>';
+        return;
+      }
+
+      const thresholds = [6, 30, 60];
+      let total = 0;
+      let rows = '';
+
+      thresholds.forEach((day) => {
+        if (daysLate >= day) {
+          const penalty = Math.max(installment * penaltyRate, minPenalty);
+          total += penalty;
+          rows += `<tr>
+            <td>${day}</td>
+            <td>6%</td>
+            <td>${penalty.toFixed(2)} جنيه</td>
+            <td>${total.toFixed(2)} جنيه</td>
+          </tr>`;
+        }
+      });
+
+      if (rows) {
+        resultDiv.innerHTML = `
+          <table>
+            <thead>
+              <tr>
+                <th>اليوم</th>
+                <th>نسبة الغرامة</th>
+                <th>قيمة الغرامة</th>
+                <th>إجمالي الغرامات</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>`;
+      }
+    }
+  </script>
+</body>
+</html>
